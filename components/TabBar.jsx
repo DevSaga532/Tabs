@@ -16,7 +16,7 @@ export const TabBar = ({ state, descriptors, navigation }) => {
             ? options.title
             : route.name;
 
-        if (["_sitemap", "+not-found"].includes(route.name)) return null;
+        if (["_sitemap", "+not-found", "auth/login", "auth/register"].includes(route.name)) return null;
 
         const isFocused = state.index === index;
 
