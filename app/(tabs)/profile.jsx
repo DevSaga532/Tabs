@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { ColorList } from "../../components/ColorList";
 
+
 const profile = () => {
   return (
     <View>
