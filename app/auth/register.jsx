@@ -1,30 +1,61 @@
+import { useState, useRef } from "react";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
-  ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
-
-import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const register = () => {
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
+  const emailRef = useRef("");
+  const nameRef = useRef("");
+  const passwordRef = useRef("");
+  const phoneRef = useRef("+1");
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
-    // Implementar la lógica de registro aquí
-    console.log("Register button pressed");
+  const onSubmit = async () => {
+    if (!emailRef.current || !passwordRef.current || !nameRef.current) {
+      Alert.alert("Sign Up", "Please fill in all fields");
+      return;
+    }
+    let name = nameRef.current.trim();
+    let email = emailRef.current.trim();
+    let password = passwordRef.current.trim();
+    let phone = phoneRef.current.trim();
+
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await SupabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          phone,
+        },
+      },
+    });
+    setLoading(false);
+
+    console.log("session", session);
+    console.log("error", error);
+
+    if (error) {
+      Alert.alert("Sign Up", error.message);
+    }
   };
   return (
     <KeyboardAvoidingView
@@ -43,10 +74,10 @@ const register = () => {
             <Ionicons name="person-outline" size={24} color="#0B0854" />
             <TextInput
               style={styles.input}
-              placeholder="Username"
+              placeholder="Name"
               placeholderTextColor="#8E8E93"
-              value={username}
-              onChangeText={setUsername}
+              value={nameRef.current}
+              onChangeText={(name) => (nameRef.current = name)}
             />
           </View>
           <View style={styles.inputWrapper}>
@@ -56,8 +87,8 @@ const register = () => {
               placeholder="Password"
               placeholderTextColor="#8E8E93"
               secureTextEntry
-              value={password}
-              onChangeText={setPassword}
+              value={passwordRef.current}
+              onChangeText={(password) => (passwordRef.current = password)}
             />
           </View>
           <View style={styles.inputWrapper}>
@@ -67,13 +98,13 @@ const register = () => {
               placeholder="+1"
               placeholderTextColor="#8E8E93"
               keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
+              value={phoneRef.current}
+              onChangeText={(phone) => (phoneRef.current = phone)}
             />
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.registerButton}>
+          <TouchableOpacity onPress={onSubmit} style={styles.registerButton}>
             <Text style={styles.registerButtonText}>Register</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.appleButton}>
